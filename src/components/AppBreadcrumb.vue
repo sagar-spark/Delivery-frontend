@@ -1,0 +1,50 @@
+<template>
+  <!-- <div className="fs-2 fw-semibold">{{ currentBreadcrumb }}</div> -->
+  <CBreadcrumb class="mb-0">
+    <CBreadcrumbItem
+      v-for="item in breadcrumbs"
+      :key="item"
+      :href="item.active ? '' : item.path"
+      :active="item.active"
+    >
+      {{ item.name }}
+    </CBreadcrumbItem>
+  </CBreadcrumb>
+</template>
+
+<script>
+import { onMounted, ref } from 'vue'
+import router from '@/router'
+
+export default {
+  name: 'AppBreadcrumb',
+  setup() {
+    const breadcrumbs = ref()
+    const currentBreadcrumb = ref()
+
+    const getBreadcrumbs = () => {
+      return router.currentRoute.value.matched.map((route) => {
+        return {
+          active: route.path === router.currentRoute.value.fullPath,
+          name: route.name,
+          path: `${router.options.history.base}${route.path}`,
+        }
+      })
+    }
+
+    router.afterEach(() => {
+      breadcrumbs.value = getBreadcrumbs()
+    })
+
+    onMounted(() => {
+      breadcrumbs.value = getBreadcrumbs()
+      currentBreadcrumb.value = [...breadcrumbs.value].pop().name
+    })
+
+    return {
+      breadcrumbs,
+      currentBreadcrumb,
+    }
+  },
+}
+</script>
